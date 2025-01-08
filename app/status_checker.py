@@ -36,6 +36,10 @@ def check_service_status(service_name, service_config):
     now = datetime.utcnow()
     hourly_status = StatusCheck.get_or_create_hourly_status(service_name, now)
     
+    # Update last_success_time if service is operational
+    if current_status == 'operational':
+        hourly_status.last_success_time = now
+    
     # Only update if current hour's status is operational and we detected an issue
     # This ensures that once an hour is marked as having an issue, it stays that way
     if hourly_status.status == 'operational' and current_status != 'operational':

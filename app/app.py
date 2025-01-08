@@ -47,12 +47,18 @@ def index():
         # Calculate uptime percentage
         uptime = StatusCheck.calculate_uptime(service_name)
         
+        # Get failure duration if service is not operational
+        failure_duration = None
+        if latest_status != 'operational':
+            failure_duration = StatusCheck.get_failure_duration(service_name)
+        
         service_data.append({
             'name': service_name,
             'description': service_config['description'],
             'current_status': latest_status,
             'uptime': uptime,
-            'status_history': status_history
+            'status_history': status_history,
+            'failure_duration': failure_duration
         })
     
     return render_template('index.html', services=service_data)

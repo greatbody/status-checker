@@ -195,6 +195,63 @@
             visibility: visible;
             opacity: 1;
         }
+
+        .active-incidents {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .active-incidents h2 {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .incident-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 6px;
+        }
+
+        .incident-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .incident-service {
+            font-weight: 500;
+        }
+
+        .incident-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .incident-status.status-issue {
+            background-color: #FFF4E5;
+            color: #FFB020;
+        }
+
+        .incident-status.status-outage {
+            background-color: #FDE7E7;
+            color: #D14343;
+        }
+
+        .incident-details {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .no-incidents {
+            color: #666;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -255,8 +312,24 @@
             {% endfor %}
         </div>
 
-        <div class="past-incidents">
-            <h2>Past Incidents</h2>
+        <div class="active-incidents">
+            <h2>Active Incidents</h2>
+            {% for service in services %}
+                {% if service.current_status != 'operational' %}
+                <div class="incident-item">
+                    <div class="incident-header">
+                        <span class="incident-service">{{ service.name }}</span>
+                        <span class="incident-status status-{{ service.current_status }}">{{ service.current_status | title }}</span>
+                    </div>
+                    <div class="incident-details">
+                        {{ service.failure_duration }}
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+            {% if not services|selectattr('current_status', 'ne', 'operational')|list %}
+                <p class="no-incidents">No active incidents reported.</p>
+            {% endif %}
         </div>
     </div>
 </body>

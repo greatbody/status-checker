@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
@@ -114,3 +114,32 @@ class StatusCheck(db.Model):
             
         operational_hours = sum(1 for hour in hourly_statuses if hour['status'] == 'operational')
         return round((operational_hours / total_hours) * 100, 2)
+
+    @staticmethod
+    def get_last_success_time(service_name):
+        """Get the last time the service was operational"""
+        last_success = StatusCheck.query.filter_by(
+            service_name=service_name,
+            status='operational'
+        ).order_by(StatusCheck.date.desc(), StatusCheck.hour.desc()).first()
+        
+        if last_success:
+            return datetime.combine(last_success.date, time(hour=last_success.hour))
+        return None
+
+    @staticmethod
+    def get_failure_duration(service_name):
+        """Get how long the service has been failing"""
+        last_success = StatusCheck.get_last_success_time(service_name)
+        if not last_success:
+            return "Never operational"
+        
+        current_time = datetime.utcnow()
+        duration = current_time - last_success
+        
+        if duration.days > 0:
+            return f"Failed for {duration.days} days, {duration.seconds // 3600} hours"
+        elif duration.seconds // 3600 > 0:
+            return f"Failed for {duration.seconds // 3600} hours, {(duration.seconds % 3600) // 60} minutes"
+        else:
+            return f"Failed for {duration.seconds // 60} minutes"
