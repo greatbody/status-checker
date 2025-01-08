@@ -4,3 +4,4 @@ SQLAlchemy==1.4.47
 requests==2.26.0
 APScheduler==3.7.0
 Werkzeug==2.1.2
+PyYAML==6.0.1

@@ -1,0 +1,26 @@
+# Service configurations for status monitoring
+services:
+  api-service:
+    description: Main API Service
+    endpoint_url: https://api.example.com/health
+    success_codes: [200]
+
+  web-frontend:
+    description: Web Frontend Application
+    endpoint_url: https://frontend.example.com/status
+    success_codes: [200, 204]
+
+  database:
+    description: Database Health Check
+    endpoint_url: https://db.example.com/health
+    success_codes: [200]
+
+  auth-service:
+    description: Authentication Service
+    endpoint_url: https://auth.example.com/health
+    success_codes: [200]
+
+  cache-service:
+    description: Redis Cache Service
+    endpoint_url: https://cache.example.com/status
+    success_codes: [200, 201] 
