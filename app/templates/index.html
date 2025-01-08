@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Status</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .historical-link {
+            color: #00B16A;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .historical-link:hover {
+            text-decoration: underline;
+        }
+
+        .components-container {
+            margin-bottom: 40px;
+        }
+
+        .component-container {
+            margin-bottom: 40px;
+            padding: 0;
+        }
+
+        .component-inner-container {
+            position: relative;
+        }
+
+        .service-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .service-name {
+            font-size: 16px;
+            font-weight: 400;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tooltip-icon {
+            color: #666;
+            font-size: 14px;
+            cursor: help;
+        }
+
+        .status-tag {
+            position: absolute;
+            right: 0;
+            top: 0;
+            color: #00B16A;
+            font-size: 14px;
+        }
+
+        .uptime-wrapper {
+            margin: 20px 0;
+        }
+
+        .shared-partial {
+            margin: 15px 0;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .legend-item.light {
+            color: #666;
+        }
+
+        .spacer {
+            flex: 1;
+        }
+
+        .availability-time-line-graphic {
+            width: 100%;
+            height: 34px;
+            display: block;
+        }
+
+        .uptime-day {
+            transition: opacity 0.2s;
+        }
+
+        .uptime-day:hover {
+            opacity: 0.8;
+        }
+
+        .status-operational {
+            background-color: #00B16A;
+        }
+
+        .status-issue {
+            background-color: #FFB020;
+        }
+
+        .status-outage {
+            background-color: #D14343;
+        }
+
+        .status-unknown {
+            background-color: #999999;
+        }
+
+        .time-range {
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .past-incidents {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .past-incidents h2 {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        /* Add tooltip styles */
+        [data-tooltip] {
+            position: relative;
+            cursor: pointer;
+        }
+
+        [data-tooltip]:before {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 12px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 12px;
+            white-space: nowrap;
+            border-radius: 4px;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+            z-index: 10;
+        }
+
+        [data-tooltip]:hover:before {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <span>Uptime over the past 24 hours.</span>
+            <a href="#" class="historical-link">View historical uptime</a>
+        </div>
+
+        <div class="components-container">
+            {% for service in services %}
+            <div class="component-container">
+                <div class="component-inner-container">
+                    <div class="service-header">
+                        <span class="service-name">
+                            {{ service.name }}
+                            <i class="fas fa-question-circle tooltip-icon" data-tooltip="{{ service.description }}"></i>
+                        </span>
+                        <span class="status-tag">{{ service.current_status | title }}</span>
+                    </div>
+                    
+                    <div class="shared-partial uptime-24-hours-wrapper">
+                        <svg class="availability-time-line-graphic" 
+                             id="uptime-component-{{ service.id }}" 
+                             preserveAspectRatio="none" 
+                             height="34" 
+                             viewBox="0 0 448 34">
+                            {% for status in service.status_history %}
+                            <rect height="34" 
+                                  width="4.5" 
+                                  x="{{ loop.index0 * 5 }}" 
+                                  y="0" 
+                                  fill="{% if status.status == 'operational' %}#00B16A{% elif status.status == 'issue' %}#FFB020{% elif status.status == 'outage' %}#D14343{% else %}#999999{% endif %}" 
+                                  role="tab" 
+                                  class="uptime-day component-{{ service.id }} day-{{ loop.index0 }}" 
+                                  data-tooltip="{{ status.date.strftime('%Y-%m-%d') }} {{ status.hour }}:00 - Status: {{ status.status | title }}"
+                                  tabindex="{% if loop.first %}0{% else %}-1{% endif %}">
+                            </rect>
+                            {% endfor %}
+                        </svg>
+                        <div class="legend">
+                            <div class="legend-item light legend-item-date-range">
+                                <span class="availability-time-line-legend-day-count">24</span> hours ago
+                            </div>
+                            <div class="spacer"></div>
+                            <div class="legend-item legend-item-uptime-value legend-item-{{ service.id }}">
+                                <span id="uptime-percent-{{ service.id }}">
+                                    <var data-var="uptime-percent">{{ "%.2f"|format(service.uptime) }}</var>
+                                </span>
+                                % uptime
+                            </div>
+                            <div class="spacer"></div>
+                            <div class="legend-item light legend-item-date-range">Now</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="past-incidents">
+            <h2>Past Incidents</h2>
+        </div>
+    </div>
+</body>
+</html>
