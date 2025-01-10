@@ -16,7 +16,7 @@ def check_service_status(service_name, service_config):
     """Check a single service's status"""
     try:
         print(f"checking service status for {service_name}: {service_config['endpoint_url']}")
-        response = requests.get(service_config['endpoint_url'], timeout=5)
+        response = requests.get(service_config['endpoint_url'], timeout=30)
         success_codes = service_config['success_codes']
         
         if response.status_code in success_codes:

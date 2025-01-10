@@ -75,7 +75,7 @@ if __name__ == '__main__':
             check_status()
     
     # Run status checks every 5 seconds
-    scheduler.add_job(scheduled_task, 'interval', seconds=5)
+    scheduler.add_job(scheduled_task, 'interval', seconds=60)
     scheduler.start()
     
-    app.run(host='0.0.0.0', port=5002)
+    app.run(host='0.0.0.0', port=8243)

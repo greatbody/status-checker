@@ -183,12 +183,16 @@
             background-color: rgba(0, 0, 0, 0.8);
             color: white;
             font-size: 12px;
-            white-space: nowrap;
+            white-space: pre-line;
             border-radius: 4px;
             visibility: hidden;
             opacity: 0;
             transition: opacity 0.2s ease-in-out;
             z-index: 10;
+            pointer-events: none;
+            margin-bottom: 5px;
+            text-align: center;
+            min-width: 120px;
         }
 
         [data-tooltip]:hover:before {
@@ -287,7 +291,7 @@
                                   fill="{% if status.status == 'operational' %}#00B16A{% elif status.status == 'issue' %}#FFB020{% elif status.status == 'outage' %}#D14343{% else %}#999999{% endif %}" 
                                   role="tab" 
                                   class="uptime-day component-{{ service.id }} day-{{ loop.index0 }}" 
-                                  data-tooltip="{{ status.date.strftime('%Y-%m-%d') }} {{ status.hour }}:00 - Status: {{ status.status | title }}"
+                                  data-tooltip="{{ status.date.strftime('%Y-%m-%d') }}&#10;{{ '%02d'|format(status.hour) }}:00&#10;{{ status.status | title }}"
                                   tabindex="{% if loop.first %}0{% else %}-1{% endif %}">
                             </rect>
                             {% endfor %}
