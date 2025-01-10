@@ -82,6 +82,7 @@ class StatusCheck(db.Model):
         """Get hourly statuses for a datetime range"""
         hourly_statuses = []
         current_datetime = start_datetime
+        found_first_status = False
         
         while current_datetime <= end_datetime:
             status = StatusCheck.query.filter_by(
@@ -90,11 +91,15 @@ class StatusCheck(db.Model):
                 hour=current_datetime.hour
             ).first()
             
-            hourly_statuses.append({
-                'date': current_datetime.date(),
-                'hour': current_datetime.hour,
-                'status': status.status if status else 'unknown'
-            })
+            if status:
+                found_first_status = True
+            
+            if found_first_status:
+                hourly_statuses.append({
+                    'date': current_datetime.date(),
+                    'hour': current_datetime.hour,
+                    'status': status.status if status else 'unknown'
+                })
             current_datetime += timedelta(hours=1)
         
         return hourly_statuses

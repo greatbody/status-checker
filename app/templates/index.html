@@ -125,6 +125,7 @@
 
         .uptime-day {
             transition: opacity 0.2s;
+            cursor: pointer;
         }
 
         .uptime-day:hover {
@@ -183,16 +184,17 @@
             background-color: rgba(0, 0, 0, 0.8);
             color: white;
             font-size: 12px;
-            white-space: pre-line;
+            white-space: pre;
             border-radius: 4px;
             visibility: hidden;
             opacity: 0;
             transition: opacity 0.2s ease-in-out;
-            z-index: 10;
+            z-index: 1000;
             pointer-events: none;
             margin-bottom: 5px;
             text-align: center;
             min-width: 120px;
+            width: auto;
         }
 
         [data-tooltip]:hover:before {

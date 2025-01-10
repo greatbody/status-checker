@@ -7,7 +7,7 @@ from pathlib import Path
 
 def load_service_config():
     """Load service configurations from YAML file"""
-    config_path = Path(current_app.root_path).parent / 'sites.yaml'
+    config_path = Path(current_app.root_path) / 'sites.yaml'
     with open(config_path, 'r') as f:
         config = yaml.safe_load(f)
     return config['services']

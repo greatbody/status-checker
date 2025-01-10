@@ -1,0 +1,14 @@
+services:
+  web:
+    build: 
+      context: .
+      no_cache: true
+    ports:
+      - "8243:8243"
+    volumes:
+      - ./data:/app/data
+      - ./sites.yaml:/app/sites.yaml
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    restart: unless-stopped
