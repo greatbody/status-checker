@@ -1,0 +1,11 @@
+services:
+  web:
+    image: ghcr.io/greatbody/status-checker:main
+    ports:
+      - "8243:8243"
+    volumes:
+      - ./data:/app/data
+      - ./sites.yaml:/app/sites.yaml
+    environment:
+      - FLASK_ENV=production
+    restart: always
