@@ -28,13 +28,8 @@ def init_db():
     if not os.path.exists('data'):
         os.makedirs('data')
     
-    # Remove old database if exists
-    db_path = 'data/status.db'
-    if os.path.exists(db_path):
-        os.remove(db_path)
-    
     with app.app_context():
-        # Create all tables
+        # Create all tables if they don't exist
         db.create_all()
         print("Database initialized successfully!")
 
