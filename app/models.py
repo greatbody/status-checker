@@ -68,17 +68,26 @@ class StatusCheck(db.Model):
     @staticmethod
     def get_minute_statuses(service_name, start_datetime, end_datetime):
         """Get minute statuses for a datetime range"""
+        # Get all statuses in the time range with a single query
+        statuses = StatusCheck.query.filter(
+            StatusCheck.service_name == service_name,
+            StatusCheck.date >= start_datetime.date(),
+            StatusCheck.date <= end_datetime.date()
+        ).order_by(StatusCheck.date, StatusCheck.hour, StatusCheck.minute).all()
+
+        # Create a dictionary for quick lookup
+        status_dict = {
+            (s.date, s.hour, s.minute): s.status 
+            for s in statuses
+        }
+
         minute_statuses = []
         current_datetime = start_datetime
         found_first_status = False
-        
+
         while current_datetime <= end_datetime:
-            status = StatusCheck.query.filter_by(
-                service_name=service_name,
-                date=current_datetime.date(),
-                hour=current_datetime.hour,
-                minute=current_datetime.minute
-            ).first()
+            key = (current_datetime.date(), current_datetime.hour, current_datetime.minute)
+            status = status_dict.get(key)
             
             if status:
                 found_first_status = True
@@ -88,7 +97,7 @@ class StatusCheck(db.Model):
                     'date': current_datetime.date(),
                     'hour': current_datetime.hour,
                     'minute': current_datetime.minute,
-                    'status': status.status if status else 'unknown'
+                    'status': status if status else 'unknown'
                 })
             current_datetime += timedelta(minutes=1)
         

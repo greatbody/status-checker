@@ -4,6 +4,7 @@ from models import db, StatusCheck
 from status_checker import check_status, load_service_config
 import os
 from datetime import datetime, time, timedelta
+from functools import lru_cache
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/status.db'
@@ -11,6 +12,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 scheduler = BackgroundScheduler()
+
+# Cache service config for 5 minutes
+@lru_cache(maxsize=1)
+def get_cached_service_config():
+    return load_service_config()
+
+# Function to invalidate cache
+def invalidate_service_config_cache():
+    get_cached_service_config.cache_clear()
 
 def init_db():
     """Initialize the database"""
@@ -30,7 +40,7 @@ def init_db():
 
 @app.route('/')
 def index():
-    services = load_service_config()
+    services = get_cached_service_config()
     service_data = []
     
     for service_name, service_config in services.items():
@@ -81,9 +91,12 @@ if __name__ == '__main__':
     def scheduled_task():
         with app.app_context():
             check_status()
+            # Invalidate cache every hour to ensure we pick up any config changes
+            if datetime.utcnow().minute == 0:
+                invalidate_service_config_cache()
     
-    # Run status checks every minute
-    scheduler.add_job(scheduled_task, 'interval', seconds=10)
+    # Run status checks every minute instead of every 10 seconds
+    scheduler.add_job(scheduled_task, 'interval', seconds=30)
     scheduler.start()
     
     app.run(host='0.0.0.0', port=8243)
