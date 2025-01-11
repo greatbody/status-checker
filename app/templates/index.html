@@ -337,10 +337,10 @@
                              viewBox="0 0 1440 34">
                             {% for status in service.status_history %}
                             <rect height="34" 
-                                  width="1" 
-                                  x="{{ loop.index0 }}" 
+                                  width="10" 
+                                  x="{{ loop.index0 * 10 }}" 
                                   y="0" 
-                                  fill="{% if status.status == 'operational' %}#00B16A{% elif status.status == 'issue' %}#FFB020{% elif status.status == 'outage' %}#D14343{% else %}#999999{% endif %}" 
+                                  fill="{% if status.status == 'operational' %}#00B16A{% elif status.status == 'issue' %}#FFB020{% elif status.status == 'outage' %}#D14343{% else %}#CCCCCC{% endif %}" 
                                   role="tab" 
                                   class="uptime-day component-{{ service.id }} day-{{ loop.index0 }}" 
                                   data-tooltip="{{ status.date.strftime('%Y-%m-%d') }}&#10;{{ '%02d'|format(status.hour) }}:{{ '%02d'|format(status.minute) }}&#10;{{ status.status | title }}"
