@@ -83,8 +83,23 @@
             position: absolute;
             right: 0;
             top: 0;
-            color: #00B16A;
             font-size: 14px;
+        }
+
+        .status-tag.operational {
+            color: #00B16A;
+        }
+
+        .status-tag.issue {
+            color: #FFB020;
+        }
+
+        .status-tag.outage {
+            color: #D14343;
+        }
+
+        .status-tag.unknown {
+            color: #999999;
         }
 
         .uptime-wrapper {
@@ -276,7 +291,7 @@
                             {{ service.name }}
                             <i class="fas fa-question-circle tooltip-icon" data-tooltip="{{ service.description }}"></i>
                         </span>
-                        <span class="status-tag">{{ service.current_status | title }}</span>
+                        <span class="status-tag {{ service.current_status }}">{{ service.current_status | title }}</span>
                     </div>
                     
                     <div class="shared-partial uptime-24-hours-wrapper">
