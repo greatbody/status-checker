@@ -284,9 +284,31 @@
             color: #666;
             font-style: italic;
         }
+
+        /* Remove the old tooltip styles */
+        [data-tooltip]:before {
+            display: none;
+        }
+
+        /* Add new tooltip styles */
+        .custom-tooltip {
+            position: fixed;
+            padding: 8px 12px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            font-size: 12px;
+            border-radius: 4px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            white-space: pre;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
+    <!-- Add tooltip container at the start of body -->
+    <div id="custom-tooltip" class="custom-tooltip"></div>
     <div class="container">
         <div class="page-header">
             <span>Uptime over the past 24 hours.</span>
@@ -366,5 +388,28 @@
             {% endif %}
         </div>
     </div>
+    <script>
+        // Add tooltip handling code before closing body tag
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltip = document.getElementById('custom-tooltip');
+            const uptimeRects = document.querySelectorAll('.uptime-day');
+
+            uptimeRects.forEach(rect => {
+                rect.addEventListener('mousemove', function(e) {
+                    const tooltipText = this.getAttribute('data-tooltip');
+                    tooltip.textContent = tooltipText;
+                    tooltip.style.display = 'block';
+                    
+                    // Position tooltip near the cursor
+                    tooltip.style.left = (e.pageX + 10) + 'px';
+                    tooltip.style.top = (e.pageY + 10) + 'px';
+                });
+
+                rect.addEventListener('mouseleave', function() {
+                    tooltip.style.display = 'none';
+                });
+            });
+        });
+    </script>
 </body>
 </html>
