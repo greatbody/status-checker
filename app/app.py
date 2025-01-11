@@ -34,14 +34,14 @@ def index():
     service_data = []
     
     for service_name, service_config in services.items():
-        # Get status checks for the last 24 hours
+        # Get status checks for the last 24 hours (1440 minutes)
         end_datetime = datetime.utcnow()
-        start_datetime = end_datetime - timedelta(hours=72)
+        start_datetime = end_datetime - timedelta(minutes=1440)
         
-        # Get hourly statuses for the last 24 hours
-        status_history = StatusCheck.get_hourly_statuses(service_name, start_datetime, end_datetime)
+        # Get minute statuses for the last 24 hours
+        status_history = StatusCheck.get_minute_statuses(service_name, start_datetime, end_datetime)
         
-        # Get latest status (current hour)
+        # Get latest status (current minute)
         latest_status = status_history[-1]['status'] if status_history else 'unknown'
         
         # Calculate uptime percentage
@@ -74,8 +74,8 @@ if __name__ == '__main__':
         with app.app_context():
             check_status()
     
-    # Run status checks every 5 seconds
-    scheduler.add_job(scheduled_task, 'interval', seconds=60)
+    # Run status checks every minute
+    scheduler.add_job(scheduled_task, 'interval', seconds=10)
     scheduler.start()
     
     app.run(host='0.0.0.0', port=8243)

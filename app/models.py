@@ -9,19 +9,22 @@ class StatusCheck(db.Model):
     status = db.Column(db.String(20), nullable=False)  # 'operational', 'issue', 'outage'
     date = db.Column(db.Date, nullable=False)
     hour = db.Column(db.Integer, nullable=False)  # 0-23
+    minute = db.Column(db.Integer, nullable=False)  # 0-59
     
     @staticmethod
-    def get_or_create_hourly_status(service_name, timestamp):
-        """Get existing hourly status or create new one if doesn't exist"""
-        # Extract date and hour from timestamp
+    def get_or_create_minute_status(service_name, timestamp):
+        """Get existing minute status or create new one if doesn't exist"""
+        # Extract date, hour and minute from timestamp
         check_date = timestamp.date()
         check_hour = timestamp.hour
+        check_minute = timestamp.minute
         
-        # Try to find existing status for this hour
+        # Try to find existing status for this minute
         status = StatusCheck.query.filter_by(
             service_name=service_name,
             date=check_date,
-            hour=check_hour
+            hour=check_hour,
+            minute=check_minute
         ).first()
         
         if not status:
@@ -30,7 +33,8 @@ class StatusCheck(db.Model):
                 service_name=service_name,
                 status='operational',
                 date=check_date,
-                hour=check_hour
+                hour=check_hour,
+                minute=check_minute
             )
             db.session.add(status)
             db.session.commit()
@@ -40,7 +44,7 @@ class StatusCheck(db.Model):
     @staticmethod
     def get_daily_status(service_name, date):
         """Get the aggregated status for a specific day"""
-        # Get all hourly statuses for the day
+        # Get all minute statuses for the day
         statuses = StatusCheck.query.filter_by(
             service_name=service_name,
             date=date
@@ -62,25 +66,9 @@ class StatusCheck(db.Model):
             return 'unknown'
 
     @staticmethod
-    def get_daily_statuses(service_name, start_date, end_date):
-        """Get daily statuses for a date range"""
-        daily_statuses = []
-        current_date = start_date
-        
-        while current_date <= end_date:
-            status = StatusCheck.get_daily_status(service_name, current_date)
-            daily_statuses.append({
-                'date': current_date,
-                'status': status
-            })
-            current_date += timedelta(days=1)
-        
-        return daily_statuses
-
-    @staticmethod
-    def get_hourly_statuses(service_name, start_datetime, end_datetime):
-        """Get hourly statuses for a datetime range"""
-        hourly_statuses = []
+    def get_minute_statuses(service_name, start_datetime, end_datetime):
+        """Get minute statuses for a datetime range"""
+        minute_statuses = []
         current_datetime = start_datetime
         found_first_status = False
         
@@ -88,37 +76,39 @@ class StatusCheck(db.Model):
             status = StatusCheck.query.filter_by(
                 service_name=service_name,
                 date=current_datetime.date(),
-                hour=current_datetime.hour
+                hour=current_datetime.hour,
+                minute=current_datetime.minute
             ).first()
             
             if status:
                 found_first_status = True
             
             if found_first_status:
-                hourly_statuses.append({
+                minute_statuses.append({
                     'date': current_datetime.date(),
                     'hour': current_datetime.hour,
+                    'minute': current_datetime.minute,
                     'status': status.status if status else 'unknown'
                 })
-            current_datetime += timedelta(hours=1)
+            current_datetime += timedelta(minutes=1)
         
-        return hourly_statuses
+        return minute_statuses
 
     @staticmethod
-    def calculate_uptime(service_name, hours=24):
+    def calculate_uptime(service_name, minutes=1440):  # 1440 minutes = 24 hours
         """Calculate uptime percentage for the specified period"""
         end_datetime = datetime.utcnow()
-        start_datetime = end_datetime - timedelta(hours=hours)
+        start_datetime = end_datetime - timedelta(minutes=minutes)
         
-        # Get hourly statuses
-        hourly_statuses = StatusCheck.get_hourly_statuses(service_name, start_datetime, end_datetime)
-        total_hours = len(hourly_statuses)
+        # Get minute statuses
+        minute_statuses = StatusCheck.get_minute_statuses(service_name, start_datetime, end_datetime)
+        total_minutes = len(minute_statuses)
         
-        if total_hours == 0:
+        if total_minutes == 0:
             return 100.0
             
-        operational_hours = sum(1 for hour in hourly_statuses if hour['status'] == 'operational')
-        return round((operational_hours / total_hours) * 100, 2)
+        operational_minutes = sum(1 for minute in minute_statuses if minute['status'] == 'operational')
+        return round((operational_minutes / total_minutes) * 100, 2)
 
     @staticmethod
     def get_last_success_time(service_name):
@@ -126,10 +116,10 @@ class StatusCheck(db.Model):
         last_success = StatusCheck.query.filter_by(
             service_name=service_name,
             status='operational'
-        ).order_by(StatusCheck.date.desc(), StatusCheck.hour.desc()).first()
+        ).order_by(StatusCheck.date.desc(), StatusCheck.hour.desc(), StatusCheck.minute.desc()).first()
         
         if last_success:
-            return datetime.combine(last_success.date, time(hour=last_success.hour))
+            return datetime.combine(last_success.date, time(hour=last_success.hour, minute=last_success.minute))
         return None
 
     @staticmethod

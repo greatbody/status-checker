@@ -32,21 +32,21 @@ def check_service_status(service_name, service_config):
         current_status = 'outage'
         print("service is outage")
     
-    # Get or create hourly status
+    # Get or create minute status
     now = datetime.utcnow()
-    hourly_status = StatusCheck.get_or_create_hourly_status(service_name, now)
+    minute_status = StatusCheck.get_or_create_minute_status(service_name, now)
     
     # Update last_success_time if service is operational
     if current_status == 'operational':
-        hourly_status.last_success_time = now
+        minute_status.last_success_time = now
     
-    # Only update if current hour's status is operational and we detected an issue
-    # This ensures that once an hour is marked as having an issue, it stays that way
-    if hourly_status.status == 'operational' and current_status != 'operational':
-        hourly_status.status = current_status
+    # Only update if current minute's status is operational and we detected an issue
+    # This ensures that once a minute is marked as having an issue, it stays that way
+    if minute_status.status == 'operational' and current_status != 'operational':
+        minute_status.status = current_status
         db.session.commit()
     
-    return hourly_status
+    return minute_status
 
 def check_status():
     """Check all services' status"""

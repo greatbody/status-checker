@@ -312,16 +312,16 @@
                              id="uptime-component-{{ service.id }}" 
                              preserveAspectRatio="none" 
                              height="34" 
-                             viewBox="0 0 448 34">
+                             viewBox="0 0 1440 34">
                             {% for status in service.status_history %}
                             <rect height="34" 
-                                  width="4.5" 
-                                  x="{{ loop.index0 * 5 }}" 
+                                  width="1" 
+                                  x="{{ loop.index0 }}" 
                                   y="0" 
                                   fill="{% if status.status == 'operational' %}#00B16A{% elif status.status == 'issue' %}#FFB020{% elif status.status == 'outage' %}#D14343{% else %}#999999{% endif %}" 
                                   role="tab" 
                                   class="uptime-day component-{{ service.id }} day-{{ loop.index0 }}" 
-                                  data-tooltip="{{ status.date.strftime('%Y-%m-%d') }}&#10;{{ '%02d'|format(status.hour) }}:00&#10;{{ status.status | title }}"
+                                  data-tooltip="{{ status.date.strftime('%Y-%m-%d') }}&#10;{{ '%02d'|format(status.hour) }}:{{ '%02d'|format(status.minute) }}&#10;{{ status.status | title }}"
                                   tabindex="{% if loop.first %}0{% else %}-1{% endif %}">
                             </rect>
                             {% endfor %}
