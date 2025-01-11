@@ -42,30 +42,6 @@ class StatusCheck(db.Model):
         return status
 
     @staticmethod
-    def get_daily_status(service_name, date):
-        """Get the aggregated status for a specific day"""
-        # Get all minute statuses for the day
-        statuses = StatusCheck.query.filter_by(
-            service_name=service_name,
-            date=date
-        ).all()
-        
-        if not statuses:
-            return 'unknown'
-        
-        # If any status is 'outage', the day is marked as outage
-        if any(s.status == 'outage' for s in statuses):
-            return 'outage'
-        # If any status is 'issue', the day is marked as having issues
-        elif any(s.status == 'issue' for s in statuses):
-            return 'issue'
-        # If all statuses are 'operational', the day is operational
-        elif all(s.status == 'operational' for s in statuses):
-            return 'operational'
-        else:
-            return 'unknown'
-
-    @staticmethod
     def get_minute_statuses(service_name, start_datetime, end_datetime):
         """Get minute statuses for a datetime range"""
         # Get all statuses in the time range with a single query
