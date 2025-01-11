@@ -48,16 +48,16 @@ def index():
         uptime = StatusCheck.calculate_uptime(service_name)
         
         # Get failure duration if service is not operational
-        failure_duration = None
-        if latest_status != 'operational':
-            failure_duration = StatusCheck.get_failure_duration(service_name)
+        failure_duration = StatusCheck.get_failure_duration(service_name) if latest_status != 'operational' else None
         
         service_data.append({
-            'name': service_name,
+            'id': service_name,
+            'name': service_config['description'],
             'description': service_config['description'],
+            'url': service_config['endpoint_url'],
             'current_status': latest_status,
-            'uptime': uptime,
             'status_history': status_history,
+            'uptime': uptime,
             'failure_duration': failure_duration
         })
     

@@ -79,6 +79,17 @@
             cursor: help;
         }
 
+        .link-icon {
+            color: #666;
+            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .link-icon:hover {
+            color: #00B16A;
+        }
+
         .status-tag {
             position: absolute;
             right: 0;
@@ -289,7 +300,9 @@
                     <div class="service-header">
                         <span class="service-name">
                             {{ service.name }}
-                            <i class="fas fa-question-circle tooltip-icon" data-tooltip="{{ service.description }}"></i>
+                            <a href="{{ service.url }}" target="_blank" class="link-icon" title="Visit service">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
                         </span>
                         <span class="status-tag {{ service.current_status }}">{{ service.current_status | title }}</span>
                     </div>
