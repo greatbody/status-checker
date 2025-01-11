@@ -3,7 +3,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from models import db, StatusCheck
 from status_checker import check_status, load_service_config
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data/status.db'
@@ -41,6 +41,13 @@ def index():
         # Get minute statuses for the last 24 hours
         status_history = StatusCheck.get_minute_statuses(service_name, start_datetime, end_datetime)
         
+        # Get first status history timestamp
+        first_status_history_timestamp = datetime.combine(status_history[0]['date'], 
+                                                        time(hour=status_history[0]['hour'], 
+                                                             minute=status_history[0]['minute'])) if status_history else datetime.utcnow()
+        # Calculate hours ago from first status
+        hours_ago = int((datetime.utcnow() - first_status_history_timestamp).total_seconds() // 3600)
+        
         # Get latest status (current minute)
         latest_status = status_history[-1]['status'] if status_history else 'unknown'
         
@@ -58,7 +65,8 @@ def index():
             'current_status': latest_status,
             'status_history': status_history,
             'uptime': uptime,
-            'failure_duration': failure_duration
+            'failure_duration': failure_duration,
+            'hours_ago': hours_ago
         })
     
     return render_template('index.html', services=service_data)

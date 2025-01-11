@@ -292,7 +292,7 @@
 
         /* Add new tooltip styles */
         .custom-tooltip {
-            position: fixed;
+            position: absolute;
             padding: 8px 12px;
             background-color: rgba(0, 0, 0, 0.8);
             color: white;
@@ -350,7 +350,7 @@
                         </svg>
                         <div class="legend">
                             <div class="legend-item light legend-item-date-range">
-                                <span class="availability-time-line-legend-day-count">24</span> hours ago
+                                <span class="availability-time-line-legend-day-count">{{ service.hours_ago }}</span>&nbsp;hours ago
                             </div>
                             <div class="spacer"></div>
                             <div class="legend-item legend-item-uptime-value legend-item-{{ service.id }}">
