@@ -41,7 +41,7 @@ def index():
     for service_name, service_config in services.items():
         # Get status checks for the last 24 hours (1440 minutes)
         end_datetime = datetime.utcnow()
-        start_datetime = end_datetime - timedelta(minutes=1440)
+        start_datetime = end_datetime - timedelta(minutes=150)
         
         # Get minute statuses for the last 24 hours
         status_history = StatusCheck.get_minute_statuses(service_name, start_datetime, end_datetime)
