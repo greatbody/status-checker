@@ -123,3 +123,54 @@ class StatusCheck(db.Model):
             return f"Failed for {duration.seconds // 3600} hours, {(duration.seconds % 3600) // 60} minutes"
         else:
             return f"Failed for {duration.seconds // 60} minutes"
+
+    @staticmethod
+    def get_aggregated_statuses(service_name, start_datetime, end_datetime):
+        """Get 30-minute aggregated statuses for a datetime range"""
+        # Get all statuses in the time range with a single query
+        statuses = StatusCheck.query.filter(
+            StatusCheck.service_name == service_name,
+            StatusCheck.date >= start_datetime.date(),
+            StatusCheck.date <= end_datetime.date()
+        ).order_by(StatusCheck.date, StatusCheck.hour, StatusCheck.minute).all()
+
+        # Create a dictionary for quick lookup
+        status_dict = {}
+        failed_count = 0
+        last_status = 'unknown'
+        for s in statuses:
+            last_status = s.status
+            timestamp = datetime.combine(s.date, time(hour=s.hour, minute=s.minute))
+            # Calculate the 30-minute block key (floor to nearest 30 minutes)
+            block_timestamp = timestamp.replace(minute=(timestamp.minute // 30) * 30)
+            if block_timestamp not in status_dict:
+                status_dict[block_timestamp] = s.status
+            else:
+                if s.status == 'issue' or s.status == 'outage':
+                    failed_count += 1
+                if failed_count > 15:
+                    status_dict[block_timestamp] = 'outage'
+                elif failed_count > 0:
+                    status_dict[block_timestamp] = 'issue'
+                else:
+                    status_dict[block_timestamp] = 'operational'
+
+        aggregated_statuses = []
+
+        current = start_datetime
+        while current <= end_datetime:
+            block_timestamp = datetime.combine(current.date(), time(hour=current.hour, minute=current.minute)).replace(minute=(timestamp.minute // 30) * 30)
+            status = status_dict.get(block_timestamp, 'unknown')
+            display_timestamp = block_timestamp + timedelta(hours=8)
+            aggregated_statuses.append({
+                'date': display_timestamp.date(),
+                'hour': display_timestamp.hour,
+                'minute': display_timestamp.minute,
+                'status': status
+            })
+            current += timedelta(minutes=30)
+        
+        # Replace the last status of aggregated_statuses with the last status of status_dict
+        aggregated_statuses[-1]['status'] = last_status
+
+        return aggregated_statuses

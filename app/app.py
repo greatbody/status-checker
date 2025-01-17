@@ -39,12 +39,12 @@ def index():
     service_data = []
     
     for service_name, service_config in services.items():
-        # Get status checks for the last 24 hours (1440 minutes)
+        # Get status checks for the last 24 hours (48 30-minute blocks)
         end_datetime = datetime.utcnow()
-        start_datetime = end_datetime - timedelta(minutes=150)
+        start_datetime = end_datetime - timedelta(minutes=4300)
         
-        # Get minute statuses for the last 24 hours
-        status_history = StatusCheck.get_minute_statuses(service_name, start_datetime, end_datetime)
+        # Get aggregated 30-minute statuses
+        status_history = StatusCheck.get_aggregated_statuses(service_name, start_datetime, end_datetime)
         
         # Get first status history timestamp
         first_status_history_timestamp = datetime.combine(status_history[0]['date'], 
@@ -53,7 +53,7 @@ def index():
         # Calculate hours ago from first status
         hours_ago = int((datetime.utcnow() - first_status_history_timestamp).total_seconds() // 3600)
         
-        # Get latest status (current minute)
+        # Get latest status (current 30-minute block)
         latest_status = status_history[-1]['status'] if status_history else 'unknown'
         
         # Calculate uptime percentage
