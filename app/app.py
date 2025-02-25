@@ -13,6 +13,16 @@ db.init_app(app)
 
 scheduler = BackgroundScheduler()
 
+# Add cache control headers for static files
+@app.after_request
+def add_header(response):
+    # Prevent caching for JavaScript files
+    if 'text/javascript' in response.headers.get('Content-Type', ''):
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
+
 # Cache service config for 5 minutes
 @lru_cache(maxsize=1)
 def get_cached_service_config():
@@ -27,7 +37,7 @@ def init_db():
     # Ensure data directory exists
     if not os.path.exists('data'):
         os.makedirs('data')
-    
+
     with app.app_context():
         # Create all tables if they don't exist
         db.create_all()
@@ -37,32 +47,32 @@ def get_service_data():
     """Get service status data for all services"""
     services = get_cached_service_config()
     service_data = []
-    
+
     for service_name, service_config in services.items():
         # Get status checks for the last 24 hours (48 30-minute blocks)
         end_datetime = datetime.now(UTC)
         start_datetime = end_datetime - timedelta(minutes=4300)
-        
+
         # Get aggregated 30-minute statuses
         status_history = StatusCheck.get_aggregated_statuses(service_name, start_datetime, end_datetime)
-        
+
         # Get first status history timestamp
-        first_status_history_timestamp = datetime.combine(status_history[0]['date'], 
-                                                        time(hour=status_history[0]['hour'], 
-                                                             minute=status_history[0]['minute']), 
+        first_status_history_timestamp = datetime.combine(status_history[0]['date'],
+                                                        time(hour=status_history[0]['hour'],
+                                                             minute=status_history[0]['minute']),
                                                         tzinfo=UTC) if status_history else datetime.now(UTC)
         # Calculate hours ago from first status
         hours_ago = int((datetime.now(UTC) - first_status_history_timestamp).total_seconds() // 3600)
-        
+
         # Get latest status (current 30-minute block)
         latest_status = status_history[-1]['status'] if status_history else 'unknown'
-        
+
         # Calculate uptime percentage
         uptime = StatusCheck.calculate_uptime(service_name)
-        
+
         # Get failure duration if service is not operational
         failure_duration = StatusCheck.get_failure_duration(service_name) if latest_status != 'operational' else None
-        
+
         # Convert date objects to string for JSON serialization
         serializable_status_history = []
         for status in status_history:
@@ -72,7 +82,7 @@ def get_service_data():
                 'minute': status['minute'],
                 'status': status['status']
             })
-        
+
         service_data.append({
             'id': service_name,
             'name': service_config['description'],
@@ -84,7 +94,7 @@ def get_service_data():
             'failure_duration': failure_duration,
             'hours_ago': hours_ago
         })
-    
+
     return service_data
 
 @app.route('/')
@@ -100,10 +110,10 @@ def api_status():
 
 if __name__ == '__main__':
     init_db()  # Initialize database
-    
+
     # Create the scheduler
     scheduler = BackgroundScheduler()
-    
+
     # Create a wrapper function that ensures app context
     def scheduled_task():
         with app.app_context():
@@ -111,9 +121,9 @@ if __name__ == '__main__':
             # Invalidate cache every hour to ensure we pick up any config changes
             if datetime.now(UTC).minute == 0:
                 invalidate_service_config_cache()
-    
+
     # Run status checks every minute instead of every 10 seconds
     scheduler.add_job(scheduled_task, 'interval', seconds=30)
     scheduler.start()
-    
+
     app.run(host='0.0.0.0', port=8243)
