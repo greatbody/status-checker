@@ -1,7 +1,242 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     margin: 0;
     padding: 20px;
+    background: #f8f9fa;
+    color: #333;
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.historical-link {
+    color: #00B16A;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.historical-link:hover {
+    text-decoration: underline;
+}
+
+.components-container {
+    margin-bottom: 40px;
+}
+
+.component-container {
+    padding: 20px;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+    margin-bottom: 15px;
+}
+
+.component-inner-container {
+    position: relative;
+}
+
+.service-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.service-name {
+    font-size: 16px;
+    font-weight: 400;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tooltip-icon {
+    color: #666;
+    font-size: 14px;
+    cursor: help;
+}
+
+.link-icon {
+    color: #666;
+    font-size: 14px;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.link-icon:hover {
+    color: #00B16A;
+}
+
+.status-tag {
+    position: absolute;
+    right: 0;
+    top: 0;
+    font-size: 14px;
+}
+
+.status-tag.operational {
+    color: #00B16A;
+}
+
+.status-tag.issue {
+    color: #FFB020;
+}
+
+.status-tag.outage {
+    color: #D14343;
+}
+
+.status-tag.unknown {
+    color: #999999;
+}
+
+.uptime-wrapper {
+    margin: 20px 0;
+}
+
+.shared-partial {
+    margin: 15px 0;
+}
+
+.legend {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+}
+
+.legend-item.light {
+    color: #666;
+}
+
+.spacer {
+    flex: 1;
+}
+
+.availability-time-line-graphic {
+    width: 100%;
+    height: 34px;
+    display: block;
+}
+
+.uptime-day {
+    transition: opacity 0.2s;
+    cursor: pointer;
+}
+
+.uptime-day:hover {
+    opacity: 0.8;
+}
+
+.uptime-day.status-operational {
+    background-color: #00B16A;
+}
+
+.uptime-day.status-issue {
+    background-color: #FFB020;
+}
+
+.uptime-day.status-outage {
+    background-color: #D14343;
+}
+
+.uptime-day.status-unknown {
+    background-color: #999999;
+}
+
+.time-range {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.past-incidents {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.past-incidents h2 {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+/* Tooltip styles */
+.custom-tooltip {
+    position: absolute;
+    padding: 8px 12px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    font-size: 12px;
+    white-space: pre;
+    border-radius: 4px;
+    visibility: visible;
+    opacity: 1;
+    z-index: 1000;
+    pointer-events: none;
+    margin-bottom: 5px;
+    text-align: center;
+    min-width: 120px;
+    width: auto;
+    display: none;
+}
+
+.active-incidents {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.active-incidents h2 {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 20px;
+}
+
+.incident-item {
+    padding: 15px;
+    margin-bottom: 15px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 6px;
+}
+
+.loading {
+    text-align: center;
+    padding: 50px;
+    font-size: 18px;
+    color: #666;
+}
+
+.error {
+    text-align: center;
+    padding: 50px;
+    font-size: 18px;
+    color: #D14343;
 }
 
 .dashboard {
